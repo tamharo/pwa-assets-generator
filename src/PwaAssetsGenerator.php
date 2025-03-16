@@ -87,6 +87,7 @@ class PwaAssetsGenerator
         ?string $outputFolderName = null,
         ?array $screenSizes = null,
         ?string $backgroundColor = null,
+        ?string $textColor = null,
         int $iconPercentage = 10,
         ?string $policePath = null
     ): array
@@ -95,6 +96,8 @@ class PwaAssetsGenerator
         $paths = [];
 
         $backgroundColor = $backgroundColor ?? config("pwaassetsgenerator.background");
+        $textColor = $textColor ?? config("pwaassetsgenerator.textColor");
+
         $outputFolderName = $outputFolderName ?? config("pwaassetsgenerator.output.splash");
         $outputFolderPath = $outputFolderName;
 
@@ -112,6 +115,7 @@ class PwaAssetsGenerator
             $canvas = imagecreatetruecolor($screenWidth, $screenHeight);
 
             list($r, $g, $b) = sscanf($backgroundColor, "#%02x%02x%02x");
+            list($tr, $tg, $tb) = sscanf($textColor, "#%02x%02x%02x");
             $bgColor = imagecolorallocate($canvas, $r, $g, $b);
             imagefill($canvas, 0, 0, $bgColor);
 
@@ -127,7 +131,7 @@ class PwaAssetsGenerator
 
             if (!is_null($name)) {
                 $fontSize = 30;
-                $fontColor = imagecolorallocate($canvas, 0, 0, 0);
+                $fontColor = imagecolorallocate($canvas, $tr, $tg, $tb);
                 $fontPath = $policePath ?? config("pwaassetsgenerator.police");
 
                 $textWidth = imagettfbbox($fontSize, 0, $fontPath, $name)[2];
@@ -166,6 +170,7 @@ class PwaAssetsGenerator
         string $letters,
         ?string $outputFolderName = null,
         ?string $backgroundColor = null,
+        ?string $textColor = null,
         int $faviconSize = 64,
         string $fileName = 'favicon',
         ?string $policePath = null
@@ -180,6 +185,7 @@ class PwaAssetsGenerator
         }
 
         $backgroundColor = $backgroundColor ?? config("pwaassetsgenerator.background");
+        $textColor = $textColor ?? config("pwaassetsgenerator.textColor");
 
         if (!file_exists($outputFolderPath)) {
             mkdir($outputFolderPath, 0777, true);
@@ -190,10 +196,11 @@ class PwaAssetsGenerator
         $canvas = imagecreatetruecolor($faviconSize, $faviconSize);
 
         list($r, $g, $b) = sscanf($backgroundColor, "#%02x%02x%02x");
+        list($tr, $tg, $tb) = sscanf($textColor, "#%02x%02x%02x");
         $bgColor = imagecolorallocate($canvas, $r, $g, $b);
         imagefill($canvas, 0, 0, $bgColor);
 
-        $fontColor = imagecolorallocate($canvas, 0, 0, 0);
+        $fontColor = imagecolorallocate($canvas, $tr, $tg, $tb);
 
         $fontSize = $faviconSize / 2;
         $fontPath = $policePath ?? config("pwaassetsgenerator.police");
@@ -294,7 +301,7 @@ class PwaAssetsGenerator
         if (file_exists($filePath)) {
             include $filePath;
         } else {
-            throw new \Exception("Le fichier de splash screen n'existe pas à l'emplacement: $filePath");
+            return;
         }
 
     }
@@ -307,7 +314,21 @@ class PwaAssetsGenerator
      * @param string $name.
      * @return string
      */
-    public static function generateAssets(string $imagePath, string $letters, ?string $name = null): string
+    public static function generateAssetsFiles($manifestData, $splashScreen, $splashPath): void
+    {
+        self::generateManifest($manifestData);
+        self::generateSplashScreenLinks($splashScreen, $splashPath);
+    }
+
+    /**
+     * generate all assets for pwa.
+     *
+     * @param string $imagePath.
+     * @param string $letters.
+     * @param string $name.
+     * @return string
+     */
+    public static function generateAssets(string $imagePath, string $letters, ?string $name = null, ?array $manifestData = null): string
     {
         $icons = self::generateAppIcon($imagePath);
 
@@ -315,7 +336,7 @@ class PwaAssetsGenerator
 
         $favicon = self::generateFavicon($letters);
 
-        self::generateManifest(["icons" => $icons]);
+        self::generateManifest($manifestData ?? ["icons" => $icons]);
         self::generateSplashScreenLinks($splashScreen);
 
         return $favicon;
