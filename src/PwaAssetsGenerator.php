@@ -4,6 +4,27 @@ namespace Manhamprod\PwaAssetsGenerator;
 
 class PwaAssetsGenerator
 {
+
+    public static function convertToRelativePath(string $absolutePath): string
+    {
+        // Trouver la position de "tenant" ou de la partie clé de l'URL
+        $startPos = strpos($absolutePath, 'tenant');
+
+        // Si "tenant" est trouvé dans l'URL
+        if ($startPos !== false) {
+            // Extraire la partie du chemin après "tenant"
+            $relativePath = substr($absolutePath, $startPos);
+
+            // Ajouter le préfixe "/storage" pour former le chemin relatif complet
+            return "/storage/" . $relativePath;
+        }
+
+        // Si "tenant" n'est pas trouvé, retourne un message d'erreur ou un chemin par défaut
+        return 'Invalid path';
+        
+    }
+
+
     /**
      * Generate application icons from the provided image.
      *
@@ -58,7 +79,7 @@ class PwaAssetsGenerator
             imagepng($canvas, $outputPath);
 
             $paths[] = [
-                "path" => $outputPath,
+                "path" => self::convertToRelativePath($outputPath),
                 "size" => $iconSize
             ];
 
@@ -144,7 +165,7 @@ class PwaAssetsGenerator
             imagepng($canvas, $outputPath);
 
             $paths[] = [
-                "path" => $outputPath,
+                "path" => self::convertToRelativePath($outputPath),
                 "size" => $size
             ];
 
