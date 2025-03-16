@@ -1,0 +1,29 @@
+{
+    "name": "manhamprod/pwa-assets-generator",
+    "description": "\"A package to generate PWA assets such as icons, splash screens, and manifests.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Manhamprod\\PwaAssetsGenerator\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Hamza Azdad",
+            "email": "hamza.azdad@icloud.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Manhamprod\\PwaAssetsGenerator\\PwaAssetsGeneratorServiceProvider"
+            ],
+            "aliases": {
+                "PwaAssetsGenerator": "Manhamprod\\PwaAssetsGenerator\\PwaAssetsGeneratorFacade"
+            }
+        }
+    }
+}
